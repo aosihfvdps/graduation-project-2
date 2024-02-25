@@ -17,14 +17,14 @@ track_data = defaultdict(list)
 frame_number = 0  # Initialize frame counter
 
 while cap.isOpened():
-    success, frame = cap.read()
+    success, frame = cap.read() #cap.read() returns 2 values. 1. If it succeeds to call the frame 2. the frame
 
     if success:
         # Object tracking
         results = model.track(frame, persist=True, classes=0)
 
         # Trajectory updates
-        boxes = results[0].boxes.xywh.cpu()
+        boxes = results[0].boxes.xywh.cpu() #assign the boxes' x y width height tensors on CPU memory
         track_ids = results[0].boxes.id.int().cpu().tolist()
 
         # Visualize results
@@ -82,7 +82,7 @@ cv2.destroyAllWindows()
 # Write track data to CSV file
 with open('chen_track_data.csv', 'w', newline='') as file:
     writer = csv.writer(file)
-    writer.writerow(['Frame_Number', 'Case_ID', 'X', 'Y', 'Distance_Traveled', 'Speed'])
+    writer.writerow(['Case_ID', 'Frame_Number', 'X', 'Y', 'Distance_Traveled', 'Speed'])
     for track_id, data in track_data.items():
         for frame_info in data:
             frame_number, x, y, distance, speed = frame_info
