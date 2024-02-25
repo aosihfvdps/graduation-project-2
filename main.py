@@ -79,12 +79,12 @@ cap.release()
 cv2.destroyAllWindows()
 
 
-# Write track data to CSV file
-with open('chen_track_data.csv', 'w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerow(['Case_ID', 'Frame_Number', 'X', 'Y', 'Distance_Traveled', 'Speed'])
-    for track_id, data in track_data.items():
-        for frame_info in data:
-            frame_number, x, y, distance, speed = frame_info
-            writer.writerow([track_id] + list(frame_info))
+# # Write track data to CSV file
+# with open('chen_track_data.csv', 'w', newline='') as file:
+#     writer = csv.writer(file)
+#     writer.writerow(['Case_ID', 'Frame_Number', 'X', 'Y', 'Distance_Traveled', 'Speed'])
+#     for track_id, data in track_data.items():
+#         for frame_info in data:
+#             frame_number, x, y, distance, speed = frame_info
+#             writer.writerow([track_id] + list(frame_info))
 
