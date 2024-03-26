@@ -1,1 +1,1 @@
-# Run use_this.py. The CSV is chen_track_data_3.csv
+# Run chen_main.py. The CSV is YOLOv8s_results.csv or YOLOv9c_results.csv
