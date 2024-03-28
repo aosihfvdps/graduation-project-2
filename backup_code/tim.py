@@ -1,3 +1,4 @@
+# function only
 import csv
 def detect_anomalies(track_history, frame_number):
     anomalies = defaultdict(list)

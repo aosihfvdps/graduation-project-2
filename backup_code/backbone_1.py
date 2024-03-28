@@ -1,3 +1,4 @@
+# Does NOT contain the Tim's part
 import csv
 from collections import defaultdict
 import cv2

@@ -1,3 +1,4 @@
+# Put a "WRONG" beside an abnormal person
 import cv2
 import numpy as np
 from collections import defaultdict
