@@ -4,14 +4,15 @@
 ### [CSV](/CSV_files)
 ### [Backup Code](/backup_code/)
 
+---
 
-<br><br>
 ### Import YOLO models
 model = YOLO('yolov8n.pt')<br>
 model = YOLO('yolov8s.pt')<br>
 model = YOLO('yolov8m.pt')<br>
 model = YOLO('yolov9c.pt')
 
+---
 <br><br>
 
 ### [Application Paperwork](https://drive.google.com/drive/folders/1wEt3on2-EK1WAa851KT5el5UeSRALbpO)
