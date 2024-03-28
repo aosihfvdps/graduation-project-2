@@ -16,7 +16,7 @@ model = YOLO('yolov9c.pt')
 
 ### [Application Paperwork](https://drive.google.com/drive/folders/1wEt3on2-EK1WAa851KT5el5UeSRALbpO)
 
-<br>
+
 
 ### Especially [this one](https://docs.google.com/document/d/1rAn80SUnV_HKOUxIjfH1O22juGVP4JKw/edit)
 
