@@ -1,8 +1,9 @@
 # Run [main.py](/main.py)
 
-### [Videos](/videos)
-### [CSV](/CSV_files)
-### [Backup Code](/backup_code/)
+### Other files:
+#### [Videos](/videos)
+#### [CSV](/CSV_files)
+#### [Backup Code](/backup_code/)
 
 ---
 
@@ -12,8 +13,8 @@ model = YOLO('yolov8s.pt')<br>
 model = YOLO('yolov8m.pt')<br>
 model = YOLO('yolov9c.pt')
 
----
-<br><br>
+
+# Before April/26, do:
 
 ### [Application Paperwork](https://drive.google.com/drive/folders/1wEt3on2-EK1WAa851KT5el5UeSRALbpO)
 
