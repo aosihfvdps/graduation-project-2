@@ -23,6 +23,8 @@ model = YOLO('yolov9c.pt')
 
 ### Especially [this one](https://docs.google.com/document/d/1rAn80SUnV_HKOUxIjfH1O22juGVP4JKw/edit)
 
+### Link to [SHAO's GitHub resources page](https://github.com/weishaoan/project)
+
 
 
 
