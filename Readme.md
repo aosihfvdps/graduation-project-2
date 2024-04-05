@@ -1,5 +1,8 @@
 ![demonstration 1](demonstration/1712340916442.gif)
 ![demonstration 2](demonstration/1712340990880.gif)
+#### 影片來自[without_direction.py](/without_direction.py)
+
+---
 
 ### [main.py](/main.py) 包含Direction，而且有整理過code
 ### [tim.py](/tim.py) April 6th TIM給的程式碼，無更動
