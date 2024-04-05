@@ -2,26 +2,20 @@ import cv2
 import numpy as np
 from collections import defaultdict
 from ultralytics import YOLO
-
 import statistics
 
 MAX_SPEED_THRESHOLD = 0
 MIN_SPEED_THRESHOLD = 0
 NORMAL_SPEED = 0
-DIRECTION_CHANGE_THRESHOLD = 150
+DIRECTION_CHANGE_THRESHOLD = 90
 
 TOO_FAST = defaultdict(lambda: False)
 TOO_SLOW = defaultdict(lambda: False)
 STOP = defaultdict(lambda: 0)
 DIRECTION = defaultdict(lambda: 0)
-DIRECTION_TIME= defaultdict(lambda: 0)
 
 LAST_UPDATE_FRAME = defaultdict(lambda: 0)
-def Swap(a,b):
-    if a>=b:
-        return a,b
-    else:
-        return b,a
+
 def mean_and_sigma(track_history, frame_number):
     everyones_speed = []
     # Calculation
@@ -46,7 +40,7 @@ def mean_and_sigma(track_history, frame_number):
 # Function to detect anomalies in tracks
 def detect_anomalies(track_history, frame_number, annotated_frame):
     global MAX_SPEED_THRESHOLD, MIN_SPEED_THRESHOLD, NORMAL_SPEED,DIRECTION_CHANGE_THRESHOLD
-    global TOO_FAST, TOO_SLOW,STOP,DIRECTION,DIRECTION_TIME
+    global TOO_FAST, TOO_SLOW,STOP,DIRECTION
     global LAST_UPDATE_FRAME
     
     if (frame_number >= 50):     
@@ -60,9 +54,6 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
                 TOO_SLOW.pop(track_id, None)
                 STOP.pop(track_id, None)
                 STOP[track_id] = 0
-                DIRECTION.pop(track_id, None)
-                DIRECTION[track_id] = 0
-                
             if((frame_number - LAST_UPDATE_FRAME[track_id]) > 50):
                 track_history[track_id] = [(0, 0)]
             ###################################停止###################################
@@ -71,7 +62,7 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
                 speeds = [np.sqrt((track[-1][0] - track[-5][0])**2 + (track[-1][1] - track[-5][1])**2)]
                 if len(track) % 50 == 0:
                     if speeds <= NORMAL_SPEED:
-                        STOP[track_id] = 15
+                        STOP[track_id] = 10
                         DIRECTION[track_id] = 0
             
             ###################################速度異常(快慢)###################################
@@ -98,67 +89,18 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
                 if STOP[track_id]>0:
                     anomaly_point = track[-1]
                     cv2.putText(annotated_frame, "STOP", (int(anomaly_point[0]), int(anomaly_point[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
-                    STOP[track_id] -=1
+                    STOP[track_id] = STOP[track_id]-1
                     DIRECTION[track_id] = 0
             
             
-            ###################################方向異常###################################
-            deviation = 3
-            errorThreshold = 10
-            if len(track) % 10 == 0 and (STOP[track_id] == 0 or STOP[track_id] == None):
-                Xmax,Xmin = Swap(track[-10][1]-(track[-5][1]-track[-1][1])*deviation,track[-10][1]+(track[-5][1]-track[-1][1])*deviation)
-                Ymax,Ymin = Swap(track[-10][0]-(track[-5][0]-track[-1][0])*deviation,track[-10][0]+(track[-5][0]-track[-1][0])*deviation)
-
-                if (track[-6][1]+track[-5][1]-track[-1][1]) < Xmin or (track[-6][1]+track[-5][1]-track[-1][1])>Xmax:
-                    if (track[-6][0]+track[-5][0]-track[-1][0]) < Ymin or (track[-6][0]+track[-5][0]-track[-1][0]) > Ymax:
-                        DIRECTION_TIME[track_id]+=1
-                        print('X:',end = '')
-                        print(track[-6][1]+track[-5][1]-track[-1][1])
-                        print('Xmax:',end = '')
-                        print(Xmax)
-                        print('Xmin:',end = '')
-                        print(Xmin)
-                        print('Y:',end = '')
-                        print(track[-6][0]+track[-5][0]-track[-1][0])
-                        print('Ymax:',end = '')
-                        print(Ymax)
-                        print('Ymin:',end = '')
-                        print(Ymin)
-                        print('ID:',end = '')
-                        print(track_id)
-                        print('Time:',end = '')
-                        print(DIRECTION_TIME[track_id])
-                        print('--------------------------------')
-                '''
-                angle1 = np.degrees(np.arctan2(track[-1][1]-track[-5][1], track[-1][0]-track[-5][0]))
-                angle2 = np.degrees(np.arctan2(track[-6][1]-track[-10][1], track[-6][0]-track[-10][0]))
-                angle_change = np.abs(angle1 - angle2)
-                
-                if angle_change > DIRECTION_CHANGE_THRESHOLD:
-                    DIRECTION_TIME[track_id]+=1
-                    print('angle:',end = '')
-                    print(angle_change)
-                    print('ID:',end = '')
-                    print(track_id)
-                '''
-                if DIRECTION_TIME[track_id] > errorThreshold:
-                    DIRECTION[track_id] = 20
-                    
-                if DIRECTION[track_id] > 0 and STOP[track_id] == 0:
-                    anomaly_point = track[-1]
-                    cv2.putText(annotated_frame, "DIRECTION", (int(anomaly_point[0]), int(anomaly_point[1]+30)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
-                    DIRECTION[track_id]-=1
-            ###################################方向異常###################################
             
-                
-
 
 
 
 # Load the YOLOv8 model
 model = YOLO('yolov8n.pt')
 
-video_path = "videos/self.mp4"
+video_path = "videos/people.mp4"
 cap = cv2.VideoCapture(video_path)
 
 # Track history and anomaly data storage
@@ -195,6 +137,7 @@ while cap.isOpened():
                 cv2.polylines(annotated_frame, [points], isClosed=False, color=(0, 256, 0), thickness=5)
                 
             detect_anomalies(track_history, frame_number, annotated_frame)
+
             cv2.putText(annotated_frame, str(frame_number), (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
             # Show the annotated frame

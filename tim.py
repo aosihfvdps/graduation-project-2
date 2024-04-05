@@ -60,9 +60,6 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
                 TOO_SLOW.pop(track_id, None)
                 STOP.pop(track_id, None)
                 STOP[track_id] = 0
-                DIRECTION.pop(track_id, None)
-                DIRECTION[track_id] = 0
-                
             if((frame_number - LAST_UPDATE_FRAME[track_id]) > 50):
                 track_history[track_id] = [(0, 0)]
             ###################################停止###################################
@@ -143,11 +140,13 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
                 '''
                 if DIRECTION_TIME[track_id] > errorThreshold:
                     DIRECTION[track_id] = 20
-                    
                 if DIRECTION[track_id] > 0 and STOP[track_id] == 0:
                     anomaly_point = track[-1]
                     cv2.putText(annotated_frame, "DIRECTION", (int(anomaly_point[0]), int(anomaly_point[1]+30)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
                     DIRECTION[track_id]-=1
+                if((frame_number - LAST_UPDATE_FRAME[track_id]) > 5):
+                    DIRECTION.pop(track_id, None)
+                    DIRECTION[track_id] = 0
             ###################################方向異常###################################
             
                 
