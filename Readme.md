@@ -25,6 +25,9 @@ model = YOLO('yolov9c.pt')
 
 ### Link to [SHAO's GitHub resources page](https://github.com/weishaoan/project)
 
+![demonstration 1](demonstration/1712340916442.gif)
+![demonstration 2](demonstration\1712340990880.gif)
+
 
 
 
