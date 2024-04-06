@@ -100,7 +100,7 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
             
             
             ###################################方向異常###################################
-            deviation = 3
+            deviation = 2
             errorThreshold = 10
             if len(track) % 10 == 0 and (STOP[track_id] == 0 or STOP[track_id] == None):
                 Xmax,Xmin = Swap(track[-10][1]-(track[-5][1]-track[-1][1])*deviation,track[-10][1]+(track[-5][1]-track[-1][1])*deviation)
@@ -157,7 +157,7 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
 # Load the YOLOv8 model
 model = YOLO('yolov8n.pt')
 
-video_path = "videos/self.mp4"
+video_path = "videos/people.mp4"
 cap = cv2.VideoCapture(video_path)
 
 # Track history and anomaly data storage

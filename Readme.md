@@ -1,6 +1,6 @@
 ![demonstration 1](demonstration/1712340916442.gif)
 ![demonstration 2](demonstration/1712340990880.gif)
-#### 影片來自[without_direction.py](/without_direction.py)
+#### 影片來自 [without_direction.py](/without_direction.py)
 
 ---
 
