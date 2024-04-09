@@ -22,14 +22,14 @@ def detect_anomalies(track_history, frame_number):
             if avg_speed > MAX_SPEED_THRESHOLD :
                 # anomalies[track_id].append(f"Speed anomaly detected at frame {frame_number}. Avg speed: {avg_speed:.2f}")
                 anomaly_point = track[-1]
-                cv2.putText(annotated_frame, "FAST", (int(anomaly_point[0]), int(anomaly_point[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+                # cv2.putText(annotated_frame, "FAST", (int(anomaly_point[0]), int(anomaly_point[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
                 # print("速度異常")
             if avg_speed < MIN_SPEED_THRESHOLD:
                 anomaly_point = track[-1]
-                cv2.putText(annotated_frame, "SLOW", (int(anomaly_point[0]), int(anomaly_point[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+                # cv2.putText(annotated_frame, "SLOW", (int(anomaly_point[0]), int(anomaly_point[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
 
 # Load the YOLOv8 model
-model = YOLO('yolov8s.pt')
+model = YOLO('yolov9c.pt')
 
 video_path = "videos/people.mp4"
 cap = cv2.VideoCapture(video_path)
@@ -57,10 +57,10 @@ while cap.isOpened():
         # print("track_history = ", track_history, "\n")
         for box, track_id in zip(boxes, track_ids):
             x, y, w, h = box
-            center_x, center_y = float(x), float(y + h / 2)  # Calculate center x and y
+            # center_x, center_y = float(x), float(y + h / 2)  # Calculate center x and y
             
             track = track_history[track_id]
-            track.append((center_x, center_y))  # Append current center point to track
+            track.append((x, y))  # Append current center point to track
 
             if len(track) > 50:  # Limit track history size
                 track.pop(0)

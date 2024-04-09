@@ -157,7 +157,7 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
 # Load the YOLOv8 model
 model = YOLO('yolov8n.pt')
 
-video_path = "videos/people.mp4"
+video_path = "videos/self.mp4"
 cap = cv2.VideoCapture(video_path)
 
 # Track history and anomaly data storage
@@ -172,7 +172,7 @@ while cap.isOpened():
     success, frame = cap.read()
 
     if success:
-        results = model.track(frame, persist=True, classes=0)
+        results = model.track(frame, persist=True, classes=0, tracker="botsort.yaml")
         
         if results[0].boxes is not None and results[0].boxes.id is not None:
             boxes = results[0].boxes.xywh.cpu()
