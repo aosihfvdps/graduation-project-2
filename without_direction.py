@@ -34,7 +34,8 @@ def mean_and_sigma(track_history, frame_number):
     print("everyones_avg = ", everyones_avg)
     print("speed_std = ", speed_std)
     
-    return (everyones_avg/45), (everyones_avg + 1.5*speed_std), (everyones_avg - 1.5*speed_std)
+    # return (everyones_avg/45), (everyones_avg + 1.5*speed_std), (everyones_avg - 1.5*speed_std)
+    return (everyones_avg/45), (everyones_avg + 2*speed_std), (everyones_avg - 2*speed_std)
     
     
 # Function to detect anomalies in tracks
@@ -98,9 +99,9 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
 
 
 # Load the YOLOv8 model
-model = YOLO('yolov8n.pt')
+model = YOLO('yolov8s.pt')
 
-video_path = "videos/people.mp4"
+video_path = "videos/self.mp4"
 cap = cv2.VideoCapture(video_path)
 
 # Track history and anomaly data storage
