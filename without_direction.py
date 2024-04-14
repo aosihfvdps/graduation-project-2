@@ -101,7 +101,7 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
 # Load the YOLOv8 model
 model = YOLO('yolov8s.pt')
 
-video_path = "videos/self.mp4"
+video_path = "videos/1034997119-preview.mp4"
 cap = cv2.VideoCapture(video_path)
 
 # Track history and anomaly data storage
