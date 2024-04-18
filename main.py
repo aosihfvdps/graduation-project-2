@@ -60,9 +60,6 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
                 TOO_SLOW.pop(track_id, None)
                 STOP.pop(track_id, None)
                 STOP[track_id] = 0
-                DIRECTION.pop(track_id, None)
-                DIRECTION[track_id] = 0
-                
             if((frame_number - LAST_UPDATE_FRAME[track_id]) > 50):
                 track_history[track_id] = [(0, 0)]
             ###################################停止###################################
@@ -103,51 +100,28 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
             
             
             ###################################方向異常###################################
-            deviation = 3
-            errorThreshold = 10
+            deviation = 0.4
+            errorThreshold = 5
             if len(track) % 10 == 0 and (STOP[track_id] == 0 or STOP[track_id] == None):
-                Xmax,Xmin = Swap(track[-10][1]-(track[-5][1]-track[-1][1])*deviation,track[-10][1]+(track[-5][1]-track[-1][1])*deviation)
-                Ymax,Ymin = Swap(track[-10][0]-(track[-5][0]-track[-1][0])*deviation,track[-10][0]+(track[-5][0]-track[-1][0])*deviation)
+                Xmax,Xmin = Swap(track[-5][1]+(track[-6][1]-track[-10][1])-(track[-10][1]-track[-6][1])*deviation,track[-5][1]+(track[-6][1]-track[-10][1])+(track[-10][1]-track[-6][1])*deviation)
+                Ymax,Ymin = Swap(track[-5][0]+(track[-6][0]-track[-10][0])-(track[-10][0]-track[-6][0])*deviation,track[-5][0]+(track[-6][0]-track[-10][0])+(track[-10][0]-track[-6][0])*deviation)
 
-                if (track[-6][1]+track[-5][1]-track[-1][1]) < Xmin or (track[-6][1]+track[-5][1]-track[-1][1])>Xmax:
-                    if (track[-6][0]+track[-5][0]-track[-1][0]) < Ymin or (track[-6][0]+track[-5][0]-track[-1][0]) > Ymax:
-                        DIRECTION_TIME[track_id]+=1
-                        print('X:',end = '')
-                        print(track[-6][1]+track[-5][1]-track[-1][1])
-                        print('Xmax:',end = '')
-                        print(Xmax)
-                        print('Xmin:',end = '')
-                        print(Xmin)
-                        print('Y:',end = '')
-                        print(track[-6][0]+track[-5][0]-track[-1][0])
-                        print('Ymax:',end = '')
-                        print(Ymax)
-                        print('Ymin:',end = '')
-                        print(Ymin)
-                        print('ID:',end = '')
-                        print(track_id)
-                        print('Time:',end = '')
-                        print(DIRECTION_TIME[track_id])
-                        print('--------------------------------')
-                '''
-                angle1 = np.degrees(np.arctan2(track[-1][1]-track[-5][1], track[-1][0]-track[-5][0]))
-                angle2 = np.degrees(np.arctan2(track[-6][1]-track[-10][1], track[-6][0]-track[-10][0]))
-                angle_change = np.abs(angle1 - angle2)
-                
-                if angle_change > DIRECTION_CHANGE_THRESHOLD:
+                if ((track[-1][1]) < Xmin or (track[-1][1])>Xmax):
                     DIRECTION_TIME[track_id]+=1
-                    print('angle:',end = '')
-                    print(angle_change)
-                    print('ID:',end = '')
-                    print(track_id)
-                '''
+                elif ((track[-1][0]) < Ymin or (track[-1][0]) > Ymax):
+                    DIRECTION_TIME[track_id]+=1
+
+                if len(track) % 50 == 0 and DIRECTION_TIME[track_id] > 1:
+                    DIRECTION_TIME[track_id]-=1
                 if DIRECTION_TIME[track_id] > errorThreshold:
                     DIRECTION[track_id] = 20
-                    
                 if DIRECTION[track_id] > 0 and STOP[track_id] == 0:
                     anomaly_point = track[-1]
                     cv2.putText(annotated_frame, "DIRECTION", (int(anomaly_point[0]), int(anomaly_point[1]+30)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
                     DIRECTION[track_id]-=1
+                if((frame_number - LAST_UPDATE_FRAME[track_id]) > 5):
+                    DIRECTION.pop(track_id, None)
+                    DIRECTION[track_id] = 0
             ###################################方向異常###################################
             
                 
