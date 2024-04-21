@@ -86,11 +86,11 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
                 
                 if TOO_FAST[track_id]:
                     anomaly_point = track[-1]
-                    cv2.putText(annotated_frame, "FAST", (int(anomaly_point[0]), int(anomaly_point[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+                    # cv2.putText(annotated_frame, "FAST", (int(anomaly_point[0]), int(anomaly_point[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
                         
                 if TOO_SLOW[track_id] and (STOP[track_id] == 0 or STOP[track_id] == None):
                     anomaly_point = track[-1]
-                    cv2.putText(annotated_frame, "SLOW", (int(anomaly_point[0]), int(anomaly_point[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+                    # cv2.putText(annotated_frame, "SLOW", (int(anomaly_point[0]), int(anomaly_point[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
                 
                 if STOP[track_id]>0:
                     anomaly_point = track[-1]
@@ -117,7 +117,7 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
                     DIRECTION[track_id] = 20
                 if DIRECTION[track_id] > 0 and STOP[track_id] == 0:
                     anomaly_point = track[-1]
-                    cv2.putText(annotated_frame, "DIRECTION", (int(anomaly_point[0]), int(anomaly_point[1]+30)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+                    # cv2.putText(annotated_frame, "DIRECTION", (int(anomaly_point[0]), int(anomaly_point[1]+30)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
                     DIRECTION[track_id]-=1
                 if((frame_number - LAST_UPDATE_FRAME[track_id]) > 5):
                     DIRECTION.pop(track_id, None)
@@ -130,7 +130,7 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
 
 
 # Load the YOLOv8 model
-model = YOLO('yolov8n.pt')
+model = YOLO('yolov9c.pt')
 
 video_path = "videos/people.mp4"
 cap = cv2.VideoCapture(video_path)
