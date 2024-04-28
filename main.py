@@ -12,11 +12,15 @@ DIRECTION_CHANGE_THRESHOLD = 150
 
 TOO_FAST = defaultdict(lambda: False)
 TOO_SLOW = defaultdict(lambda: False)
-STOP = defaultdict(lambda: 0)
+STOP = defaultdict(lambda: False)
 DIRECTION = defaultdict(lambda: 0)
 DIRECTION_TIME= defaultdict(lambda: 0)
+SLOW_TIME = defaultdict(lambda: 0)
+STOP_TIME = defaultdict(lambda: 0)
+FAST_TIME = defaultdict(lambda: 0)
 
 LAST_UPDATE_FRAME = defaultdict(lambda: 0)
+
 def Swap(a,b):
     if a>=b:
         return a,b
@@ -40,13 +44,13 @@ def mean_and_sigma(track_history, frame_number):
     print("everyones_avg = ", everyones_avg)
     print("speed_std = ", speed_std)
     
-    return (everyones_avg/45), (everyones_avg + 1.5*speed_std), (everyones_avg - 1.5*speed_std)
+    return (everyones_avg/90), (everyones_avg + 2.1*speed_std), (everyones_avg - 1.3*speed_std)
     
     
 # Function to detect anomalies in tracks
 def detect_anomalies(track_history, frame_number, annotated_frame):
     global MAX_SPEED_THRESHOLD, MIN_SPEED_THRESHOLD, NORMAL_SPEED,DIRECTION_CHANGE_THRESHOLD
-    global TOO_FAST, TOO_SLOW,STOP,DIRECTION,DIRECTION_TIME
+    global TOO_FAST, TOO_SLOW,STOP,DIRECTION,DIRECTION_TIME,SLOW_TIME,FAST_TIME,STOP_TIME
     global LAST_UPDATE_FRAME
     
     if (frame_number >= 50):     
@@ -55,54 +59,82 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
 
         for track_id, track in track_history.items():
             
-            if((frame_number - LAST_UPDATE_FRAME[track_id]) > 10):
+            if((frame_number - LAST_UPDATE_FRAME[track_id]) > 5):
                 TOO_FAST.pop(track_id, None)
                 TOO_SLOW.pop(track_id, None)
                 STOP.pop(track_id, None)
-                STOP[track_id] = 0
             if((frame_number - LAST_UPDATE_FRAME[track_id]) > 50):
                 track_history[track_id] = [(0, 0)]
-            ###################################停止###################################
-            if len(track) >= 5:
-            # if len(track) % 5 == 0:
-                speeds = [np.sqrt((track[-1][0] - track[-5][0])**2 + (track[-1][1] - track[-5][1])**2)]
-                if len(track) % 50 == 0:
-                    if speeds <= NORMAL_SPEED:
-                        STOP[track_id] = 15
-                        DIRECTION[track_id] = 0
-            
-            ###################################速度異常(快慢)###################################
+                
+            ###################################速度異常(快慢) & 停止###################################
             if len(track) >= 10:
                 speeds = [np.sqrt((track[-1][0]-track[-10][0])**2 + (track[-1][1]-track[-10][1])**2)]
                 avg_speed = np.mean(speeds)
                 
-                if (frame_number % 50 == 0):
-                    TOO_FAST[track_id] = avg_speed > MAX_SPEED_THRESHOLD
-                    TOO_SLOW[track_id] = avg_speed < MIN_SPEED_THRESHOLD
+                if (frame_number % 10 == 0):
                     if((avg_speed < MAX_SPEED_THRESHOLD) and (avg_speed > MIN_SPEED_THRESHOLD)):
                         TOO_FAST[track_id] = False
                         TOO_SLOW[track_id] = False
-                        
+
+                    if avg_speed > MAX_SPEED_THRESHOLD and FAST_TIME[track_id] < 10:
+                        FAST_TIME[track_id]+=1.5
+                    else:
+                        FAST_TIME[track_id]-=1
+                        if FAST_TIME[track_id] < 0:
+                            FAST_TIME[track_id] = 0
+
+                    if avg_speed < MIN_SPEED_THRESHOLD:
+                        if avg_speed < MIN_SPEED_THRESHOLD*0.32:
+                            STOP_TIME[track_id]+=1
+                        else:
+                            SLOW_TIME[track_id]+=1
+
+                if FAST_TIME[track_id] > 2:
+                    TOO_FAST[track_id] = True
+                else:
+                    TOO_FAST[track_id] = False
                 
+                if (SLOW_TIME[track_id]+STOP_TIME[track_id] >= 5):
+                    TOO_SLOW[track_id] = False
+                    STOP[track_id] = False
+                    if  SLOW_TIME[track_id] >= STOP_TIME[track_id]:
+                        TOO_SLOW[track_id] = True
+                        SLOW_TIME[track_id] = 0
+                        STOP_TIME[track_id] = 0
+                    elif STOP_TIME[track_id] > SLOW_TIME[track_id]:
+                        STOP[track_id] = True
+                        SLOW_TIME[track_id] = 0
+                        STOP_TIME[track_id] = 0
+                else:
+                    if SLOW_TIME[track_id] >= 3:
+                        TOO_SLOW[track_id] = True
+                        STOP[track_id] = False
+                        SLOW_TIME[track_id] = 0
+                        STOP_TIME[track_id] = 0
+                    elif STOP_TIME[track_id] >= 3:
+                        STOP[track_id] = True
+                        TOO_SLOW[track_id] = False
+                        SLOW_TIME[track_id] = 0
+                        STOP_TIME[track_id] = 0
+
+
                 if TOO_FAST[track_id]:
                     anomaly_point = track[-1]
-                    # cv2.putText(annotated_frame, "FAST", (int(anomaly_point[0]), int(anomaly_point[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
-                        
-                if TOO_SLOW[track_id] and (STOP[track_id] == 0 or STOP[track_id] == None):
+                    cv2.putText(annotated_frame, "FAST", (int(anomaly_point[0]), int(anomaly_point[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2) 
+                if TOO_SLOW[track_id]:
                     anomaly_point = track[-1]
-                    # cv2.putText(annotated_frame, "SLOW", (int(anomaly_point[0]), int(anomaly_point[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
-                
-                if STOP[track_id]>0:
+                    cv2.putText(annotated_frame, "SLOW", (int(anomaly_point[0]), int(anomaly_point[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+                if STOP[track_id]:
                     anomaly_point = track[-1]
                     cv2.putText(annotated_frame, "STOP", (int(anomaly_point[0]), int(anomaly_point[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
-                    STOP[track_id] -=1
                     DIRECTION[track_id] = 0
+                    
             
             
             ###################################方向異常###################################
-            deviation = 0.4
+            deviation = 0.3
             errorThreshold = 5
-            if len(track) % 10 == 0 and (STOP[track_id] == 0 or STOP[track_id] == None):
+            if len(track) % 10 == 0 and (STOP[track_id] == False or STOP[track_id] == None):
                 Xmax,Xmin = Swap(track[-5][1]+(track[-6][1]-track[-10][1])-(track[-10][1]-track[-6][1])*deviation,track[-5][1]+(track[-6][1]-track[-10][1])+(track[-10][1]-track[-6][1])*deviation)
                 Ymax,Ymin = Swap(track[-5][0]+(track[-6][0]-track[-10][0])-(track[-10][0]-track[-6][0])*deviation,track[-5][0]+(track[-6][0]-track[-10][0])+(track[-10][0]-track[-6][0])*deviation)
 
@@ -115,24 +147,21 @@ def detect_anomalies(track_history, frame_number, annotated_frame):
                     DIRECTION_TIME[track_id]-=1
                 if DIRECTION_TIME[track_id] > errorThreshold:
                     DIRECTION[track_id] = 20
-                if DIRECTION[track_id] > 0 and STOP[track_id] == 0:
+                if DIRECTION[track_id] > 0 and STOP[track_id] == False:
                     anomaly_point = track[-1]
-                    # cv2.putText(annotated_frame, "DIRECTION", (int(anomaly_point[0]), int(anomaly_point[1]+30)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+                    cv2.putText(annotated_frame, "DIRECTION", (int(anomaly_point[0]), int(anomaly_point[1]+30)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
                     DIRECTION[track_id]-=1
                 if((frame_number - LAST_UPDATE_FRAME[track_id]) > 5):
                     DIRECTION.pop(track_id, None)
                     DIRECTION[track_id] = 0
             ###################################方向異常###################################
-            
-                
 
 
 
 
-# Load the YOLOv8 model
 model = YOLO('yolov8n.pt')
 
-video_path = "videos/people.mp4"
+video_path = "videos/final.mp4"
 cap = cv2.VideoCapture(video_path)
 
 # Track history and anomaly data storage
